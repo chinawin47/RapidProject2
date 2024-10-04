@@ -25,7 +25,7 @@ public class MovementPlayer : MonoBehaviour
         movement.y = rb.velocity.y;
 
         // Jumping (Space key)
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
