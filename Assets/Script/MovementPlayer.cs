@@ -24,7 +24,7 @@ public class MovementPlayer : MonoBehaviour
         movement.y = rb.velocity.y; // Retain current Y velocity (gravity, jumping, etc.)
 
         // Jumping (W key)
-        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
