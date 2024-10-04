@@ -1,48 +1,47 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlatformMovement : MonoBehaviour
 {
-    public Transform platform;
-    public Transform startPoint;
-    public Transform endPoint;
-    public float speed = 1.5f;
+    public Transform posA, posB;
+    public float speed ;
+    Vector3 targetPos;
 
-    int direction = 1;
+
+    private void Start()
+    {
+        targetPos = posA.position;
+    }
+
 
     private void Update()
-    {
-        Vector2 target = currentMovementTarget();
-        platform.position = Vector2.Lerp(platform.position, target, speed * Time.deltaTime);
-
-        float distance = (target - (Vector2)platform.position).magnitude;
-        if (distance <= 1.0f)
         {
-            direction *= -1;
+            if(Vector2.Distance(transform.position, posA.position) < 0.05f)
+            {
+              targetPos = posB.position;
+            }
+            if (Vector2.Distance(transform.position, posB.position) < 0.05f)
+            {
+            targetPos = posA.position;
+            }
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+
+        }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.CompareTag("Player"))
+        {
+            collision.transform.parent = this.transform;
         }
     }
 
-    Vector2 currentMovementTarget()
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        if (direction == 1)
+        if (collision.CompareTag("Player"))
         {
-            return startPoint.position;
+            collision.transform.parent = null;
         }
-        else
-        {
-            return endPoint.position;
-        }
-
     }
 
-
-    private void OnDrawGizmos()
-    {
-        if (platform != null && startPoint != null && endPoint != null)
-        {
-            Gizmos.DrawLine(platform.transform.position, startPoint.position);
-            Gizmos.DrawLine(platform.transform.position, endPoint.position);
-        }
-    }
 }
