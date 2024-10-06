@@ -353,7 +353,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4170435829675178606, guid: 2061f454c4032414ab2783ec269a79c1, type: 3}
       propertyPath: wallSlideSpeed
-      value: 6
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4170435829675178606, guid: 2061f454c4032414ab2783ec269a79c1, type: 3}
+      propertyPath: wallJumpForce.x
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4170435829675178606, guid: 2061f454c4032414ab2783ec269a79c1, type: 3}
+      propertyPath: wallJumpForce.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4170435829675178606, guid: 2061f454c4032414ab2783ec269a79c1, type: 3}
+      propertyPath: wallJumpCooldown
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4170435829675178606, guid: 2061f454c4032414ab2783ec269a79c1, type: 3}
+      propertyPath: wallJumpDirection
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4170435829675178606, guid: 2061f454c4032414ab2783ec269a79c1, type: 3}
       propertyPath: wallJumpDirection.x
