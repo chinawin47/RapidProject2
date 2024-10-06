@@ -12,12 +12,20 @@ public class MovementPlayer : MonoBehaviour
 
     bool isGrounded;
     bool doubleJump;
+    bool isTouchingWall;
+    public float wallSlideSpeed = 0.5f;
+    public float wallJumpForce = 10f;  // กำหนดแรงสำหรับการกระโดดออกจากกำแพง
+    public Vector2 wallJumpDirection = new Vector2(1, 1);  // กำหนดทิศทางในการกระโดดออกจากกำแพง
+    private bool isWallJumping;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
-
+    private void Start()
+    {
+        wallJumpDirection.Normalize();
+    }
 
     private void Update()
     {
@@ -29,6 +37,10 @@ public class MovementPlayer : MonoBehaviour
                 rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
                 doubleJump = true;
             }
+            else if (isTouchingWall && !isGrounded)
+            {
+                WallJump();
+            }
             else if (doubleJump)
             {
                 rb.AddForce(new Vector2(0, jumpForce * 0.7f), ForceMode2D.Impulse);
@@ -36,11 +48,31 @@ public class MovementPlayer : MonoBehaviour
             }
         }
 
-        // Optional: Move down faster when falling (S key)
-        if (Input.GetKey(KeyCode.S) && !isGrounded)
+        // Wall sliding logic
+        if (isTouchingWall && !isGrounded && rb.velocity.y < 0 && !isWallJumping)
         {
-            rb.AddForce(Vector2.down * speed, ForceMode2D.Force);
+            rb.velocity = new Vector2(rb.velocity.x, -wallSlideSpeed);
         }
+    }
+
+    private void WallJump()
+    {
+        // ป้องกันการกระโดดซ้ำทันทีหลังจาก Wall Jump
+        isWallJumping = true;
+
+        // กระโดดในทิศทางตรงข้ามกับกำแพง (ถ้า h เป็นลบ หมายความว่าเคลื่อนไปทางซ้าย, ถ้าเป็นบวกคือเคลื่อนไปทางขวา)
+        Vector2 jumpDirection = new Vector2(-h, 1).normalized;
+
+        rb.velocity = new Vector2(0, 0);  // รีเซ็ตความเร็ว
+        rb.AddForce(jumpDirection * wallJumpForce, ForceMode2D.Impulse);
+
+        // หน่วงเวลาเล็กน้อยก่อนให้ตัวละครเคลื่อนที่ได้หลังจากกระโดดออกจากกำแพง
+        Invoke(nameof(ResetWallJump), 0.2f);
+    }
+
+    private void ResetWallJump()
+    {
+        isWallJumping = false;
     }
 
     void FixedUpdate()
@@ -67,6 +99,10 @@ public class MovementPlayer : MonoBehaviour
             isGrounded = true;
         }
 
+        if (collision.gameObject.CompareTag("Wall") && !isGrounded)
+        {
+            isTouchingWall = true;
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -76,6 +112,10 @@ public class MovementPlayer : MonoBehaviour
             isGrounded = false;
         }
 
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            isTouchingWall = false;
+        }
     }
 
 
