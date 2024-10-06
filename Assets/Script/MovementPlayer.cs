@@ -4,45 +4,60 @@ using UnityEngine;
 
 public class MovementPlayer : MonoBehaviour
 {
-    public float moveSpeed = 5f;     // Speed of the player
-    public float jumpForce = 5f;     // Jump force
-    private Rigidbody2D rb;          // Reference to the Rigidbody2D component
-    private Vector2 movement;        // Stores the movement input
-    private bool isGrounded;         // Check if player is grounded
+    float h;
+    public float speed;
+    Rigidbody2D rb;
 
-    void Start()
+    public float jumpForce;
+
+    bool isGrounded;
+    bool doubleJump;
+
+    private void Awake()
     {
-        // Automatically assign the Rigidbody2D component
         rb = GetComponent<Rigidbody2D>();
     }
 
-    void Update()
+
+    private void Update()
     {
-        // Horizontal movement (A/D or left/right arrows)
-        movement.x = Input.GetAxisRaw("Horizontal") * moveSpeed;
-
-        // Retain the current vertical velocity (gravity, jumping, etc.)
-        movement.y = rb.velocity.y;
-
-        // Jumping (Space key)
-        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
+        h = Input.GetAxisRaw("Horizontal");
+        if (Input.GetKeyDown(KeyCode.W))
         {
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            if (isGrounded)
+            {
+                rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+                doubleJump = true;
+            }
+            else if (doubleJump)
+            {
+                rb.AddForce(new Vector2(0, jumpForce * 0.7f), ForceMode2D.Impulse);
+                doubleJump = false;
+            }
         }
 
         // Optional: Move down faster when falling (S key)
         if (Input.GetKey(KeyCode.S) && !isGrounded)
         {
-            rb.AddForce(Vector2.down * moveSpeed, ForceMode2D.Force);
+            rb.AddForce(Vector2.down * speed, ForceMode2D.Force);
         }
     }
 
     void FixedUpdate()
     {
-        // Apply horizontal movement (only X axis is considered in 2D)
-        Vector2 newPosition = new Vector2(movement.x, rb.velocity.y) * Time.fixedDeltaTime;
-        rb.velocity = new Vector2(movement.x, rb.velocity.y);
+        rb.velocity = new Vector2(h * speed, rb.velocity.y);
+
     }
+
+
+
+    void flip()
+    {
+        if (h < -0.01f) transform.localScale = new Vector3(-1, 1, 1);
+        if (h > 0.01f) transform.localScale = new Vector3(1, 1, 1);
+
+    }
+
 
     // Ground detection for jumping (you can replace this with a more accurate ground check like raycasting)
     private void OnCollisionStay2D(Collision2D collision)
@@ -51,7 +66,7 @@ public class MovementPlayer : MonoBehaviour
         {
             isGrounded = true;
         }
-      
+
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -60,7 +75,7 @@ public class MovementPlayer : MonoBehaviour
         {
             isGrounded = false;
         }
-       
+
     }
 
 
