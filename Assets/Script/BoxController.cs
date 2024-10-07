@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovementPlayer : MonoBehaviour
+public class BoxController : MonoBehaviour
 {
     public float moveSpeed = 5f;     // Speed of the player
     public float jumpForce = 10f;    // Jump force
