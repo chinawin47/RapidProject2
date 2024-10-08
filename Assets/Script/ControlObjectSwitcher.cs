@@ -8,15 +8,21 @@ public class ControlObjectSwitcher : MonoBehaviour
     private GameObject currentControlledObject;   // The object currently under control
     private int currentIndex = 0;                 // The index of the currently controlled object
 
-    public float moveSpeed = 5f;                  // Speed at which the objects will move
-    public float jumpForce = 5f;                  // Jump force if the object can jump
+    public float moveSpeed = 5f;                   // Speed at which the objects will move
+    public float jumpHeight = 2f;                  // Height of the jump
+    public float jumpDuration = 0.5f;              // Duration of the jump
 
-    private Rigidbody2D rb;                       // Reference to the Rigidbody2D of the currently controlled object
-    private bool isGrounded = false;              // To check if the controlled object is grounded
-    private bool onBlock = false;                 // To check if the controlled object is on a block
-
-    public Camera mainCamera;                     // Reference to the main camera
+    public Camera mainCamera;                      // Reference to the main camera
     public Vector3 cameraOffset = new Vector3(0, 2, -10); // Offset for the camera from the controlled object
+
+    private bool isJumping = false;                // To check if the object is currently jumping
+    private float jumpStartY;                      // Y position where the jump starts
+    private float jumpEndY;                        // Y position where the jump ends
+    private float jumpTime;                        // Timer to track the jump progress
+
+    [Header("Jump Cooldown")]
+    public float jumpCooldown = 1f;                // Cooldown time between jumps
+    private float jumpCooldownTimer = 0f;          // Timer to track cooldown
 
     void Start()
     {
@@ -24,7 +30,6 @@ public class ControlObjectSwitcher : MonoBehaviour
         if (controllableObjects.Count > 0)
         {
             currentControlledObject = controllableObjects[currentIndex];
-            rb = currentControlledObject.GetComponent<Rigidbody2D>();
 
             // Set the camera to follow the first controlled object
             if (mainCamera == null)
@@ -46,8 +51,26 @@ public class ControlObjectSwitcher : MonoBehaviour
             SwitchToNextObject();
         }
 
-        // Handle movement of the currently controlled object
+        // Handle horizontal movement
         HandleMovement();
+
+        // Decrease the jump cooldown timer
+        if (jumpCooldownTimer > 0)
+        {
+            jumpCooldownTimer -= Time.deltaTime;
+        }
+
+        // Handle jumping if not currently jumping and cooldown is finished
+        if (Input.GetKeyDown(KeyCode.Space) && !isJumping && jumpCooldownTimer <= 0f)
+        {
+            StartJump();
+        }
+
+        // If the object is jumping, handle the jump progression
+        if (isJumping)
+        {
+            HandleJump();
+        }
 
         // Update the camera position to follow the current object
         UpdateCameraPosition();
@@ -71,7 +94,6 @@ public class ControlObjectSwitcher : MonoBehaviour
     private void SetCurrentControlledObject(int index)
     {
         currentControlledObject = controllableObjects[index];
-        rb = currentControlledObject.GetComponent<Rigidbody2D>();
 
         // Immediately update the camera position when switching objects
         UpdateCameraPosition();
@@ -83,19 +105,42 @@ public class ControlObjectSwitcher : MonoBehaviour
         if (currentControlledObject == null)
             return;
 
-        float h = Input.GetAxisRaw("Horizontal");
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        Vector3 currentPosition = currentControlledObject.transform.position;
 
-        // Move the object horizontally
-        rb.velocity = new Vector2(h * moveSpeed, rb.velocity.y);
+        // Move the object horizontally based on input
+        currentPosition.x += horizontalInput * moveSpeed * Time.deltaTime;
+        currentControlledObject.transform.position = currentPosition;
+    }
 
-        // Jump when pressing space and the object is either on the ground or on a block
-        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || onBlock))
+    // Start the jump process
+    private void StartJump()
+    {
+        isJumping = true;
+        jumpStartY = currentControlledObject.transform.position.y;
+        jumpEndY = jumpStartY + jumpHeight;
+        jumpTime = 0f; // Reset the jump timer
+        jumpCooldownTimer = jumpCooldown; // Reset the cooldown timer
+    }
+
+    // Handle the jump logic
+    private void HandleJump()
+    {
+        jumpTime += Time.deltaTime;
+
+        // Calculate the percentage of the jump completion
+        float jumpProgress = jumpTime / jumpDuration;
+
+        // If the jump is complete, stop jumping
+        if (jumpProgress >= 1f)
         {
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpProgress = 1f;
+            isJumping = false; // Reset jump state
         }
 
-        // No need to flip the object
-        // FlipObject(h); // Removed
+        // Calculate the new Y position using a simple interpolation
+        float newY = Mathf.Lerp(jumpStartY, jumpEndY, jumpProgress);
+        currentControlledObject.transform.position = new Vector3(currentControlledObject.transform.position.x, newY, currentControlledObject.transform.position.z);
     }
 
     // Update camera position to follow the currently controlled object
@@ -105,35 +150,6 @@ public class ControlObjectSwitcher : MonoBehaviour
         {
             Vector3 targetPosition = currentControlledObject.transform.position + cameraOffset;
             mainCamera.transform.position = targetPosition;
-        }
-    }
-
-    // Check for ground detection for jumping (similar to the player's detection logic)
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
-
-        // Check if the player is standing on a block
-        if (collision.gameObject.CompareTag("Block"))
-        {
-            onBlock = true;
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
-        }
-
-        // Check if the player is no longer on a block
-        if (collision.gameObject.CompareTag("Block"))
-        {
-            onBlock = false;
         }
     }
 }
