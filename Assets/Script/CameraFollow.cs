@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CameraFollow : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class CameraFollow : MonoBehaviour
     void LateUpdate()
     {
         // Check for input to switch the target
-        if (Input.GetKeyDown(KeyCode.Tab)) // Press Tab to switch
+        if (Input.GetKeyDown(KeyCode.E)) // Press Tab to switch
         {
             SwitchTarget();
         }

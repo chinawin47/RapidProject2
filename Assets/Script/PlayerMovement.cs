@@ -33,12 +33,21 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+
+        }
+        if (collision.gameObject.CompareTag("MovableObject"))
+        {
+            isGrounded = true;
         }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
+        }
+        if (collision.gameObject.CompareTag("MovableObject"))
         {
             isGrounded = false;
         }
