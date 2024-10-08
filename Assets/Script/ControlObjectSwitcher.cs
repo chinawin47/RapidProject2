@@ -37,7 +37,7 @@ public class ControlObjectSwitcher : MonoBehaviour
     void Update()
     {
         // Switch between controllable objects (using E for example)
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             SwitchToNextObject();
         }
