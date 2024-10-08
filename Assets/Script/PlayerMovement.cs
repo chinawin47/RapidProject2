@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -50,6 +51,15 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("MovableObject"))
         {
             isGrounded = false;
+        }
+    }
+
+    public Text winText;
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "Win")
+        {
+            winText.gameObject.SetActive(true);
         }
     }
 }
