@@ -11,6 +11,7 @@ TagManager:
   - MovebleObject
   - MovableObject
   - Box
+  - Win
   layers:
   - Default
   - TransparentFX
