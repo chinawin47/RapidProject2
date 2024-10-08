@@ -13,6 +13,7 @@ public class ControlObjectSwitcher : MonoBehaviour
 
     private Rigidbody2D rb;                       // Reference to the Rigidbody2D of the currently controlled object
     private bool isGrounded = false;              // To check if the controlled object is grounded
+    private bool onBlock = false;                 // To check if the controlled object is on a block
 
     public Camera mainCamera;                     // Reference to the main camera
     public Vector3 cameraOffset = new Vector3(0, 2, -10); // Offset for the camera from the controlled object
@@ -87,23 +88,14 @@ public class ControlObjectSwitcher : MonoBehaviour
         // Move the object horizontally
         rb.velocity = new Vector2(h * moveSpeed, rb.velocity.y);
 
-        // Jump when pressing space and the object is grounded
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        // Jump when pressing space and the object is either on the ground or on a block
+        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || onBlock))
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
 
-        // Flip the object based on movement direction
-        FlipObject(h);
-    }
-
-    // Flip the object to face the direction of movement
-    private void FlipObject(float h)
-    {
-        if (h > 0)
-            currentControlledObject.transform.localScale = new Vector3(1, 1, 1); // Face right
-        else if (h < 0)
-            currentControlledObject.transform.localScale = new Vector3(-1, 1, 1); // Face left
+        // No need to flip the object
+        // FlipObject(h); // Removed
     }
 
     // Update camera position to follow the currently controlled object
@@ -123,6 +115,12 @@ public class ControlObjectSwitcher : MonoBehaviour
         {
             isGrounded = true;
         }
+
+        // Check if the player is standing on a block
+        if (collision.gameObject.CompareTag("Block"))
+        {
+            onBlock = true;
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -130,6 +128,12 @@ public class ControlObjectSwitcher : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
+        }
+
+        // Check if the player is no longer on a block
+        if (collision.gameObject.CompareTag("Block"))
+        {
+            onBlock = false;
         }
     }
 }
