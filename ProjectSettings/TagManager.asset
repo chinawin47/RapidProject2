@@ -8,6 +8,8 @@ TagManager:
   - MovingPlatform
   - Wall
   - Block
+  - MovebleObject
+  - MovableObject
   layers:
   - Default
   - TransparentFX
