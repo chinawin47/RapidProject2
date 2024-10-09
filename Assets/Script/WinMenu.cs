@@ -9,12 +9,12 @@ public class WinMenu : MonoBehaviour
 
     public void retry()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene(3);
     }
 
     public void Menu()
     {
-        SceneManager.LoadScene(mainMenu);
+        SceneManager.LoadScene(0);
     }
     
     
