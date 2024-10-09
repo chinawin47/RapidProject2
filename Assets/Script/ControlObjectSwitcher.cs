@@ -10,10 +10,13 @@ public class ControlObjectSwitcher : MonoBehaviour
 
     public float moveSpeed = 5f;                  // Speed at which the objects will move
     public float jumpForce = 5f;                  // Jump force if the object can jump
+    public float jumpCooldown = 1f;               // Cooldown time for jumping
 
     private Rigidbody2D rb;                       // Reference to the Rigidbody2D of the currently controlled object
     private bool isGrounded = false;              // To check if the controlled object is grounded
     private bool onBlock = false;                 // To check if the controlled object is on a block
+    private bool canJump = true;                  // Check if the object is allowed to jump
+    private float jumpTimer = 0f;                 // Timer to track the cooldown
 
     public Camera mainCamera;                     // Reference to the main camera
     public Vector3 cameraOffset = new Vector3(0, 2, -10); // Offset for the camera from the controlled object
@@ -36,7 +39,7 @@ public class ControlObjectSwitcher : MonoBehaviour
 
     void Update()
     {
-        // Switch between controllable objects (using E for example)
+        // Switch between controllable objects (using Q for example)
         if (Input.GetKeyDown(KeyCode.Q))
         {
             SwitchToNextObject();
@@ -47,19 +50,23 @@ public class ControlObjectSwitcher : MonoBehaviour
 
         // Update the camera position to follow the current object
         UpdateCameraPosition();
+
+        // Handle jump cooldown timer
+        if (!canJump)
+        {
+            jumpTimer += Time.deltaTime;
+            if (jumpTimer >= jumpCooldown)
+            {
+                canJump = true;
+                jumpTimer = 0f;  // Reset timer
+            }
+        }
     }
 
     // Switch to the next object in the list
     private void SwitchToNextObject()
     {
         currentIndex = (currentIndex + 1) % controllableObjects.Count; // Cycle through the list
-        SetCurrentControlledObject(currentIndex);
-    }
-
-    // Switch to the previous object in the list
-    private void SwitchToPreviousObject()
-    {
-        currentIndex = (currentIndex - 1 + controllableObjects.Count) % controllableObjects.Count; // Cycle through the list backward
         SetCurrentControlledObject(currentIndex);
     }
 
@@ -84,14 +91,12 @@ public class ControlObjectSwitcher : MonoBehaviour
         // Move the object horizontally
         rb.velocity = new Vector2(h * moveSpeed, rb.velocity.y);
 
-        // Jump when pressing space and the object is either on the ground or on a block
-        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || onBlock))
+        // Jump when pressing space, object is grounded or on a block, and the jump cooldown allows it
+        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || onBlock) && canJump)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            canJump = false;  // Disable jump until cooldown finishes
         }
-
-        // No need to flip the object
-        // FlipObject(h); // Removed
     }
 
     // Update camera position to follow the currently controlled object
@@ -104,7 +109,7 @@ public class ControlObjectSwitcher : MonoBehaviour
         }
     }
 
-    // Check for ground detection for jumping (similar to the player's detection logic)
+    // Check for ground detection for jumping
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
