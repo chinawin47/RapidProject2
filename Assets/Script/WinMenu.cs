@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class WinMenu : MonoBehaviour
 {
-    public string mainMenu = "MainMenu";
+    public string mainMenu = "Main Menu";
 
     public void retry()
     {
